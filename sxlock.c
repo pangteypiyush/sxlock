@@ -149,7 +149,7 @@ handle_signal(int sig) {
 }
 
 void
-main_loop(Window w, GC gc, XFontStruct* font, WindowPositionInfo* info, char passdisp[256], char* username, XColor UNUSED(black), XColor white, XColor red, Bool hidelength) {
+main_loop(Window w, GC gc, XFontStruct* font, WindowPositionInfo* info, char passdisp[256], char* username, XColor UNUSED(black), XColor white, XColor red, XColor blue, XColor yellow, Bool hidelength) {
     XEvent event;
     KeySym ksym;
 
@@ -186,8 +186,17 @@ main_loop(Window w, GC gc, XFontStruct* font, WindowPositionInfo* info, char pas
             int x;
             /* draw username and line */
             x = base_x - XTextWidth(font, username, strlen(username)) / 2;
+			char hostname[20] = "[";
+			gethostname(hostname+1, 20);
+			int hlen = strlen(hostname);
+			hostname[hlen] = ']';
+			hostname[hlen + 1] = '\0';
+			XSetForeground(dpy, gc, white.pixel);
             XDrawString(dpy, w, gc, x, base_y - 10, username, strlen(username));
+			XSetForeground(dpy, gc, yellow.pixel);
+            XDrawString(dpy, w, gc, base_x - XTextWidth(font, hostname, strlen(hostname)) / 2, base_y - 25 , hostname, strlen(hostname));
             XDrawLine(dpy, w, gc, line_x_left, base_y, line_x_right, base_y);
+			XSetForeground(dpy, gc, blue.pixel);
 
             /* clear old passdisp */
             XClearArea(dpy, w, info->output_x, base_y + 20, info->output_width, ascent + descent, False);
@@ -310,7 +319,7 @@ main(int argc, char** argv) {
 
     Cursor invisible;
     Window root, w;
-    XColor black, red, white;
+    XColor black, red, white, blue, grey, yellow;
     XFontStruct* font;
     GC gc;
 
@@ -402,14 +411,17 @@ main(int argc, char** argv) {
         Colormap cmap = DefaultColormap(dpy, screen_num);
         XAllocNamedColor(dpy, cmap, "orange red", &red, &dummy);
         XAllocNamedColor(dpy, cmap, "black", &black, &dummy);
-        XAllocNamedColor(dpy, cmap, "white", &white, &dummy);
+        XAllocNamedColor(dpy, cmap, "#282828", &grey, &dummy);
+        XAllocNamedColor(dpy, cmap, "#8EC07C", &blue, &dummy);
+        XAllocNamedColor(dpy, cmap, "#EBDBB2", &white, &dummy);
+        XAllocNamedColor(dpy, cmap, "#FE8019", &yellow, &dummy);
     }
 
     /* create window */
     {
         XSetWindowAttributes wa;
         wa.override_redirect = 1;
-        wa.background_pixel = black.pixel;
+        wa.background_pixel = grey.pixel;
         w = XCreateWindow(dpy, root, 0, 0, info.display_width, info.display_height,
                 0, DefaultDepth(dpy, screen_num), CopyFromParent,
                 DefaultVisual(dpy, screen_num), CWOverrideRedirect | CWBackPixel, &wa);
@@ -477,7 +489,7 @@ main(int argc, char** argv) {
     }
 
     /* run main loop */
-    main_loop(w, gc, font, &info, passdisp, opt_username, black, white, red, opt_hidelength);
+    main_loop(w, gc, font, &info, passdisp, opt_username, black, white, red, blue, yellow, opt_hidelength);
 
     /* restore dpms settings */
     if (using_dpms) {
