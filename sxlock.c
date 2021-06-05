@@ -341,7 +341,7 @@ main(int argc, char** argv) {
 
     /* set default values for command-line arguments */
     opt_passchar = "*";
-    opt_font = "sans-24";
+    opt_font = "DejaVu Sans Mono";
     opt_username = username;
     opt_hidelength = False;
     opt_usedpms = True;
@@ -422,28 +422,16 @@ main(int argc, char** argv) {
     {
         XColor dummy;
         Colormap cmap = DefaultColormap(dpy, screen_num);
-        XAllocNamedColor(dpy, cmap, "black", &black, &dummy);
+        XAllocNamedColor(dpy, cmap, "#282828", &black, &dummy);
     }
 
     /* allocate Xft colors */
     {
-        XRenderColor xrcolor;
+        XftColorAllocName(dpy, DefaultVisual(dpy, DefaultScreen(dpy)),
+                DefaultColormap(dpy, screen_num), "#928374", &white);
 
-        xrcolor.red = 0xffff;
-        xrcolor.green = 0xffff;
-        xrcolor.blue = 0xffff;
-        xrcolor.alpha = 0xffff;
-
-        XftColorAllocValue(dpy, DefaultVisual(dpy, DefaultScreen(dpy)),
-                DefaultColormap(dpy, DefaultScreen(dpy)), &xrcolor, &white);
-
-        xrcolor.red = 0xffff;
-        xrcolor.green = 0x0;
-        xrcolor.blue = 0x0;
-        xrcolor.alpha = 0xffff;
-
-        XftColorAllocValue(dpy, DefaultVisual(dpy, DefaultScreen(dpy)),
-                DefaultColormap(dpy, DefaultScreen(dpy)), &xrcolor, &red);
+        XftColorAllocName(dpy, DefaultVisual(dpy, DefaultScreen(dpy)),
+                DefaultColormap(dpy, screen_num), "#fe8019", &red);
     }
 
     /* create window */
